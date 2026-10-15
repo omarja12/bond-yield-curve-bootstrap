@@ -1,0 +1,27 @@
+name: run
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python check.py
+      - run: python plot_rates.py
+      - name: Equities (needs Yahoo Finance; allowed to fail)
+        run: python equities.py
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: figures
+          path: "*.png"
